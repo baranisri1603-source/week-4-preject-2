@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Character Counter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem auto;
+      max-width: 32rem;
+      padding: 0 1rem;
+    }
+
+    label,
+    textarea {
+      display: block;
+      width: 100%;
+    }
+
+    label {
+      margin-bottom: 0.35rem;
+    }
+
+    textarea {
+      box-sizing: border-box;
+      min-height: 10rem;
+      padding: 0.5rem;
+      resize: vertical;
+    }
+
+    #counter {
+      margin-top: 0.5rem;
+    }
+
+    #warning {
+      color: #b00020;
+      min-height: 1em;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Write a message</h1>
+    <label for="message">Message (200 characters max)</label>
+    <textarea id="message" maxlength="200" aria-describedby="counter warning"></textarea>
+    <p id="counter" aria-live="polite">0/200 characters (200 remaining)</p>
+    <p id="warning" role="alert"></p>
+  </main>
+
+  <script>
+    const maxCharacters = 200;
+    const message = document.getElementById("message");
+    const counter = document.getElementById("counter");
+    const warning = document.getElementById("warning");
+
+    function updateCounter() {
+      counter.textContent = `${message.value.length}/${maxCharacters} characters (${maxCharacters - message.value.length} remaining)`;
+    }
+
+    message.addEventListener("beforeinput", (event) => {
+      let insertedText = event.data;
+      if (insertedText === null && event.dataTransfer) {
+        insertedText = event.dataTransfer.getData("text/plain");
+      }
+      if (event.inputType === "insertLineBreak" || event.inputType === "insertParagraph") {
+        insertedText = "\n";
+      }
+      if (typeof insertedText !== "string" || !event.inputType.startsWith("insert")) {
+        return;
+      }
+
+      const selectedLength = message.selectionEnd - message.selectionStart;
+      const resultingLength = message.value.length - selectedLength + insertedText.length;
+      if (resultingLength > maxCharacters) {
+        event.preventDefault();
+        warning.textContent = `You can enter up to ${maxCharacters} characters.`;
+      }
+    });
+
+    message.addEventListener("input", () => {
+      warning.textContent = "";
+      if (message.value.length > maxCharacters) {
+        message.value = message.value.slice(0, maxCharacters);
+        warning.textContent = `You can enter up to ${maxCharacters} characters.`;
+      }
+      updateCounter();
+    });
+  </script>
+</body>
+</html>
